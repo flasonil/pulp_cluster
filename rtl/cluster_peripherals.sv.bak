@@ -201,7 +201,13 @@ module cluster_peripherals
         .TCDM_arb_policy_o (TCDM_arb_policy_o          )
         //.rw_margin_L1_o    ( rw_margin_L1_o            )
    );
-  
+
+   lockstep_unit lockstep_unit_i(
+                                 .clk_i(clk_i),
+                                 .rst_ni(rst_ni),
+                                 .speriph_slave(speriph_slave[LOCKSTEP_ID]
+               );
+                                 
 
 
   //********************************************************
@@ -297,12 +303,6 @@ module cluster_peripherals
   );
 
   
-lockstep_unit_wrap lockstep_unit_wrap_i(
-	.clk_i(clk_i),
-	.rst_ni(rst_ni),
-	.speriph_slave(speriph_slave[LOCKSTEP_ID])
-);
-
   //********************************************************
   //******************** icache_ctrl_unit ******************
   //********************************************************

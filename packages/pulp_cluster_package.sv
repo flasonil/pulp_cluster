@@ -21,7 +21,7 @@ package pulp_cluster_package;
 
   // number of master and slave cluster periphs
   parameter NB_MPERIPHS          =  1;
-  parameter NB_SPERIPHS          = 10;
+  parameter NB_SPERIPHS          = 11;
   
   // position of peripherals on slave port of periph interconnect
   parameter SPER_EOC_ID      = 0;
@@ -33,6 +33,7 @@ package pulp_cluster_package;
   parameter SPER_DMA_FC_ID   = 7;
   parameter SPER_DECOMP_ID   = 8; 
   parameter SPER_EXT_ID      = 9;
+  parameter LOCKSTEP_ID	     = 3;
   
   // if set to 1, then instantiate APU in the cluster
  // parameter APU_CLUSTER = 0;
