@@ -32,18 +32,18 @@ module cluster_lockstep_wrap
       .clk_i            ( clk_i                ),
       .rst_ni           ( rst_ni               ),
       
-      .req_i            ( periph_slave.req     ),
-      .addr_i           ( periph_slave.add     ),
-      .wen_i            ( periph_slave.wen     ),
-      .wdata_i          ( periph_slave.wdata   ),
-      .be_i             ( periph_slave.be      ),
-      .id_i             ( periph_slave.id      ),
-      .gnt_o            ( periph_slave.gnt     ),
+        .req_i            ( speriph_slave.req     ),
+        .addr_i           ( speriph_slave.add     ),
+        .wen_i            ( speriph_slave.wen     ),
+        .wdata_i          ( speriph_slave.wdata   ),
+        .be_i             ( speriph_slave.be      ),
+        .id_i             ( speriph_slave.id      ),
+        .gnt_o            ( speriph_slave.gnt     ),
       
-      .r_valid_o        ( periph_slave.r_valid ),
-      .r_opc_o          ( periph_slave.r_opc   ),
-      .r_id_o           ( periph_slave.r_id    ),
-      .r_rdata_o        ( periph_slave.r_rdata )
+        .r_valid_o        ( speriph_slave.r_valid ),
+        .r_opc_o          ( speriph_slave.r_opc   ),
+        .r_id_o           ( speriph_slave.r_id    ),
+        .r_rdata_o        ( speriph_slave.r_rdata )
       );
    
 endmodule // cluster_lockstep_wrap
