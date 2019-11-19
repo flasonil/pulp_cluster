@@ -25,7 +25,7 @@ module cluster_peripherals
   parameter NB_CORES       = 8,
   parameter NB_MPERIPHS    = 1,
   parameter NB_CACHE_BANKS = 4,
-  parameter NB_SPERIPHS    = 8,
+  //parameter NB_SPERIPHS    = 8,
   parameter NB_TCDM_BANKS  = 8,
   parameter ROM_BOOT_ADDR  = 32'h1A000000,
   parameter BOOT_ADDR      = 32'h1C000000,
@@ -52,7 +52,7 @@ module cluster_peripherals
 
   output logic                        busy_o,
 
-  XBAR_PERIPH_BUS.Slave               speriph_slave[NB_SPERIPHS-2:0],
+  XBAR_PERIPH_BUS.Slave               speriph_slave[NB_SPERIPHS-1:0],
   XBAR_PERIPH_BUS.Slave               core_eu_direct_link[NB_CORES-1:0],
 
   //input  logic [NB_CORES-1:0]         dma_events_i,
@@ -296,12 +296,7 @@ module cluster_peripherals
     .message_master         ( eu_message_master      )
   );
 
-  
-lockstep_unit_wrap lockstep_unit_wrap_i(
-	.clk_i(clk_i),
-	.rst_ni(rst_ni),
-	.speriph_slave(speriph_slave[LOCKSTEP_ID])
-);
+
 
   //********************************************************
   //******************** icache_ctrl_unit ******************
@@ -437,5 +432,17 @@ lockstep_unit_wrap lockstep_unit_wrap_i(
       end
     end
   endgenerate
+	
+  //********************************************************
+  //******************** LOCKSTEP_UNIT *********************
+  //********************************************************
    
+   cluster_lockstep_wrap #(
+    .ID_WIDTH (NB_CORES+NB_MPERIPHS)
+  ) cluster_lockstep_wrap_i (
+	  .clk_i (clk_i),
+	  .rst_ni (rst_ni),
+	  .speriph_slave (speriph_slave[LOCKSTEP_ID])
+  );
+
 endmodule // cluster_peripherals
