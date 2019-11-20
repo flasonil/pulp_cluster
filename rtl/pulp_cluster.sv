@@ -30,7 +30,7 @@ module pulp_cluster
   parameter NB_HWPE_PORTS      = 4,
   parameter NB_DMAS            = 4,
   parameter NB_MPERIPHS        = 1,
-  //parameter NB_SPERIPHS        = 9,
+  parameter NB_SPERIPHS        = 9,
   
   parameter CLUSTER_ALIAS_BASE = 12'h000,
   
@@ -728,7 +728,7 @@ module pulp_cluster
     .NB_CORES       ( NB_CORES       ),
     .NB_MPERIPHS    ( NB_MPERIPHS    ),
     .NB_CACHE_BANKS ( NB_CACHE_BANKS ),
-    //.NB_SPERIPHS    ( NB_SPERIPHS    ),
+    .NB_SPERIPHS    ( NB_SPERIPHS    ),
     .NB_TCDM_BANKS  ( NB_TCDM_BANKS  ),
     .ROM_BOOT_ADDR  ( ROM_BOOT_ADDR  ),
     .BOOT_ADDR      ( BOOT_ADDR      ),
@@ -751,7 +751,7 @@ module pulp_cluster
     .core_busy_i            ( core_busy                          ),
     .core_clk_en_o          ( clk_core_en                        ),
 
-    .speriph_slave          ( s_xbar_speriph_bus[NB_SPERIPHS-1:0]),
+    .speriph_slave          ( s_xbar_speriph_bus[NB_SPERIPHS-2:0]),
     .core_eu_direct_link    ( s_core_euctrl_bus                  ), 
 
     .dma_cfg_master         ( s_periph_dma_bus                   ),
