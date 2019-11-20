@@ -25,7 +25,7 @@ module cluster_peripherals
   parameter NB_CORES       = 8,
   parameter NB_MPERIPHS    = 1,
   parameter NB_CACHE_BANKS = 4,
-  //parameter NB_SPERIPHS    = 8,
+  parameter NB_SPERIPHS    = 8,
   parameter NB_TCDM_BANKS  = 8,
   parameter ROM_BOOT_ADDR  = 32'h1A000000,
   parameter BOOT_ADDR      = 32'h1C000000,
@@ -52,7 +52,7 @@ module cluster_peripherals
 
   output logic                        busy_o,
 
-  XBAR_PERIPH_BUS.Slave               speriph_slave[NB_SPERIPHS-1:0],
+  XBAR_PERIPH_BUS.Slave               speriph_slave[NB_SPERIPHS-2:0],
   XBAR_PERIPH_BUS.Slave               core_eu_direct_link[NB_CORES-1:0],
 
   //input  logic [NB_CORES-1:0]         dma_events_i,
