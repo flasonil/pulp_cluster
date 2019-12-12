@@ -1598,7 +1598,7 @@ module pulp_cluster
   assign s_data_master_async.b_user         = data_master_b_user_i;
   assign data_master_b_readpointer_o        = s_data_master_async.b_readpointer;
    
-lockstep_wrap lockstep_wrap_i
+lockstep_unit_wrap lockstep_unit_wrap_i
   (
    .clk_i(clk_i),
    .rst_ni(rst_ni),
