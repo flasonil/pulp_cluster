@@ -12,11 +12,11 @@ module cluster_lockstep_wrap
 input logic [7:0] barrier_matched
     );
    
-   lockstep_unit
+   lockstep_ctrl
      #(
        .ID_WIDTH        ( ID_WIDTH             )
        )
-   lockstep_unit_i
+   lockstep_ctrl_i
      (
       .clk_i            ( clk_i                ),
       .rst_ni           ( rst_ni               ),
