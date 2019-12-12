@@ -8,7 +8,8 @@ module cluster_lockstep_wrap
     input  logic          ref_clk_i,
     
     XBAR_PERIPH_BUS.Slave speriph_slave
-    //XBAR_TCDM_BUS.Master tcdm_data_master
+    output logic lockstep_mode,
+input logic [7:0] barrier_matched
     );
    
    lockstep_unit
