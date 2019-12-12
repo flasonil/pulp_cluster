@@ -32,7 +32,9 @@ input logic [7:0] barrier_matched
       .r_valid_o        ( speriph_slave.r_valid ),
       .r_opc_o          ( speriph_slave.r_opc   ),
       .r_id_o           ( speriph_slave.r_id    ),
-      .r_rdata_o        ( speriph_slave.r_rdata )
+       .r_rdata_o        ( speriph_slave.r_rdata ),
+             .lockstep_mode (lockstep_mode),
+.barrier_matched(barrier_matched)
       );
    
 endmodule // cluster_lockstep_wrap
