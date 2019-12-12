@@ -7,7 +7,7 @@ module cluster_lockstep_wrap
     input  logic          rst_ni,
     input  logic          ref_clk_i,
     
-    XBAR_PERIPH_BUS.Slave speriph_slave
+    XBAR_PERIPH_BUS.Slave speriph_slave,
     output logic lockstep_mode,
 input logic [7:0] barrier_matched
     );
