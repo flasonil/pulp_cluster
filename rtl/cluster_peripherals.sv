@@ -96,7 +96,8 @@ module cluster_peripherals
   input logic [NB_CORES-1:0][3:0]     hwpe_events_i,
   output logic                        hwpe_sel_o,
   output logic                        hwpe_en_o,
-
+	
+	output logic               lockstep_mode,
   //output logic [NB_L1_CUTS-1:0][RW_MARGIN_WIDTH-1:0] rw_margin_L1_o,
 
   // Control ports
@@ -119,6 +120,7 @@ module cluster_peripherals
  
 );
    
+	logic [7:0] barrier_matched;
   logic                      s_timer_out_lo_event;
   logic                      s_timer_out_hi_event;
   logic                      s_timer_in_lo_event;
@@ -293,7 +295,8 @@ module cluster_peripherals
     .soc_periph_evt_ready_o ( soc_periph_evt_ready_o ),
     .soc_periph_evt_data_i  ( soc_periph_evt_data_i  ),  
     
-    .message_master         ( eu_message_master      )
+		.message_master         ( eu_message_master      ),
+		.barrier_matched(barrier_matched)
   );
 
 
@@ -440,9 +443,11 @@ module cluster_peripherals
    cluster_lockstep_wrap #(
     .ID_WIDTH (NB_CORES+NB_MPERIPHS)
   ) cluster_lockstep_wrap_i (
-	  .clk_i (clk_i),
-	  .rst_ni (rst_ni),
-	  .speriph_slave (speriph_slave[LOCKSTEP_ID])
+	                           .clk_i (clk_i),
+	                           .rst_ni (rst_ni),
+	                           .speriph_slave (speriph_slave[LOCKSTEP_ID]),
+                             .lockstep_mode(lockstep_mode),
+.barrier_matched(barrier_matched)
   );
-
+	
 endmodule // cluster_peripherals
