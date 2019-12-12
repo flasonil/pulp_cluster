@@ -346,6 +346,8 @@ module pulp_cluster
   logic                                       s_dma_decompr_irq;
 
   logic                                       s_decompr_done_evt;
+	
+	logic																				lockstep_mode;
 
   assign s_dma_fc_irq = s_decompr_done_evt;
 
@@ -373,7 +375,9 @@ module pulp_cluster
   XBAR_TCDM_BUS s_mperiph_demux_bus[1:0]();
   
   // cores & accelerators -> log interconnect
-  XBAR_TCDM_BUS s_core_xbar_bus[NB_CORES+NB_HWPE_PORTS-1:0]();
+   XBAR_TCDM_BUS s_core_xbar_bus[NB_CORES+NB_HWPE_PORTS-1:0]();
+   XBAR_TCDM_BUS core2lockstep[NB_CORES+NB_HWPE_PORTS-1:0]();
+   XBAR_TCDM_BUS interconnect2lockstep[NB_CORES+NB_HWPE_PORTS-1:0]();
   
   // cores -> periph interconnect
   XBAR_PERIPH_BUS s_core_periph_bus[NB_CORES-1:0]();
@@ -671,7 +675,7 @@ module pulp_cluster
     .clk_i              ( clk_cluster                         ),
     .rst_ni             ( rst_ni                              ),
 
-    .core_tcdm_slave    ( s_core_xbar_bus                     ),
+		.core_tcdm_slave    ( interconnect2lockstep                     ),
     .core_periph_slave  ( s_core_periph_bus                   ),
 
     .ext_slave          ( s_ext_xbar_bus                      ),
@@ -792,6 +796,7 @@ module pulp_cluster
     .hwpe_events_i          ( s_hwpe_remap_evt                   ),
     .hwpe_sel_o             ( s_hwpe_sel                         ),
     .hwpe_en_o              ( s_hwpe_en                          ),
+		.lockstep_mode(lockstep_mode),
 `ifdef PRIVATE_ICACHE
       .IC_ctrl_unit_bus_main  (  IC_ctrl_unit_bus_main              ),
       .IC_ctrl_unit_bus_pri   (  IC_ctrl_unit_bus_pri               ),
@@ -888,7 +893,7 @@ module pulp_cluster
         //.debug_core_halted_o ( dbg_core_halted[i]    ),
         //.debug_core_halt_i   ( dbg_core_halt[i]      ),
         //.debug_core_resume_i ( dbg_core_resume[i]    ),
-        .tcdm_data_master    ( s_core_xbar_bus[i]    ),
+				.tcdm_data_master    ( core2lockstep[i]    ),
 
         //tcdm, dma ctrl unit, periph interco interfaces
         //.dma_ctrl_master     ( s_core_dmactrl_bus[i] ),
@@ -1033,7 +1038,7 @@ module pulp_cluster
         .clk               ( clk_cluster                                        ),
         .rst_n             ( s_rst_n                                            ),
         .test_mode         ( test_mode_i                                        ),
-        .hwpe_xbar_master  ( s_core_xbar_bus[NB_CORES+NB_HWPE_PORTS-1:NB_CORES] ),
+        .hwpe_xbar_master  ( core2lockstep[NB_CORES+NB_HWPE_PORTS-1:NB_CORES] ),
         .hwpe_cfg_slave    ( s_hwpe_cfg_bus                                     ),
         .evt_o             ( s_hwpe_evt                                         ),
         .busy_o            ( s_hwpe_busy                                        )
@@ -1593,4 +1598,13 @@ module pulp_cluster
   assign s_data_master_async.b_user         = data_master_b_user_i;
   assign data_master_b_readpointer_o        = s_data_master_async.b_readpointer;
    
+lockstep_wrap lockstep_wrap_i
+  (
+   .clk_i(clk_i),
+   .rst_ni(rst_ni),
+   .lockstep2core(core2lockstep),
+   .lockstep2interconnect(interconnect2lockstep),
+   .lockstep_mode(lockstep_mode)
+   );
+	
 endmodule
