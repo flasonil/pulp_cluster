@@ -27,4 +27,5 @@ pulp_cluster:
     rtl/per2axi_wrap.sv,
     rtl/pulp_cluster.sv,
     rtl/cluster_lockstep_wrap.sv,
+    rtl/lockstep_unit_wrap.sv,
   ]
