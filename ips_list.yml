@@ -24,9 +24,9 @@ cluster_interconnect:
   domain: [cluster]
   group: pulp-platform
 event_unit_flex:
-  commit: tags/v1.0.1
+  commit: master
   domain: [cluster]
-  group: pulp-platform
+  group: flasonil
 mchan:
   commit: tags/v1.0.3
   domain: [cluster]
