@@ -1,4 +1,4 @@
-module lockstep_wrap
+module lockstep_unit_wrap
   (
    input logic clk_i,
    input logic rst_ni,
