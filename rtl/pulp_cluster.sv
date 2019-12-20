@@ -828,96 +828,62 @@ module pulp_cluster
   //         ╚██████╗╚██████╔╝██║  ██║███████╗            //
   //          ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝            //
   //------------------------------------------------------//
-  
-  /* cluster cores + core-coupled accelerators / shared execution units */
-  generate
-    for (genvar i=0; i<NB_CORES; i++) begin : CORE
 
-      pulp_sync dbg_irq_sync
-           (
-               .clk_i(clk_cluster),
-               .rstn_i(s_rst_n),
-               .serial_i(dbg_irq_valid_i[i]),
-               .serial_o(s_dbg_irq[i])
-           );
-
-
-      core_region #(
-        .CORE_ID             ( i                  ),
-        .ADDR_WIDTH          ( 32                 ),
-        .DATA_WIDTH          ( 32                 ),
-        .INSTR_RDATA_WIDTH   ( INSTR_RDATA_WIDTH  ),
-        .CLUSTER_ALIAS_BASE  ( CLUSTER_ALIAS_BASE ),
-        .REMAP_ADDRESS       ( REMAP_ADDRESS      ),
-        .APU_NARGS_CPU       ( APU_NARGS_CPU      ), //= 2,
-        .APU_WOP_CPU         ( APU_WOP_CPU        ), //= 1,
-        .WAPUTYPE            ( WAPUTYPE           ), //= 3,
-        .APU_NDSFLAGS_CPU    ( APU_NDSFLAGS_CPU   ), //= 3,
-        .APU_NUSFLAGS_CPU    ( APU_NUSFLAGS_CPU   ), //= 5,
-
-        .FPU                 ( CLUST_FPU               ),
-        .FP_DIVSQRT          ( CLUST_FP_DIVSQRT        ),
-        .SHARED_FP           ( CLUST_SHARED_FP         ),
-        .SHARED_FP_DIVSQRT   ( CLUST_SHARED_FP_DIVSQRT )
-
-                    
-      ) core_region_i (
-        .clk_i               ( clk_cluster           ),
-        .rst_ni              ( s_rst_n               ),
-        .base_addr_i         ( base_addr_i           ),
-
-        .init_ni             ( s_init_n              ),
-        .cluster_id_i        ( cluster_id_i          ),
-        .clock_en_i          ( clk_core_en[i]        ),
-        .fetch_en_i          ( fetch_en_int[i]       ),
-       
-        .boot_addr_i         ( boot_addr[i]          ),
-        .irq_id_i            ( irq_id[i]             ),
-	      .irq_ack_id_o        ( irq_ack_id[i]         ),
-        .irq_req_i           ( irq_req[i]            ),
-        .irq_ack_o           ( irq_ack[i]            ),
-	
-        .test_mode_i         ( test_mode_i           ),
-        .core_busy_o         ( core_busy[i]          ),
-
-        //instruction cache bind 
-        .instr_req_o         ( instr_req[i]          ),
-        .instr_gnt_i         ( instr_gnt[i]          ),
-        .instr_addr_o        ( instr_addr[i]         ),
-        .instr_r_rdata_i     ( instr_r_rdata[i]      ),
-        .instr_r_valid_i     ( instr_r_valid[i]      ),
-
-        //debug unit bind
-        .debug_req_i         ( s_core_dbg_irq[i]     ),
-        //.debug_bus           ( s_debug_bus[i]        ),
-        //.debug_core_halted_o ( dbg_core_halted[i]    ),
-        //.debug_core_halt_i   ( dbg_core_halt[i]      ),
-        //.debug_core_resume_i ( dbg_core_resume[i]    ),
-				.tcdm_data_master    ( core2lockstep[i]    ),
-
-        //tcdm, dma ctrl unit, periph interco interfaces
-        //.dma_ctrl_master     ( s_core_dmactrl_bus[i] ),
-        .eu_ctrl_master      ( s_core_euctrl_bus[i]  ),
-        .periph_data_master  ( s_core_periph_bus[i]  ),
-      
-        .fregfile_disable_i  (  s_fregfile_disable     )
+  riscv_wrapper #(
+                  .FPU                   ( CLUST_FPU               ),
+                  .FP_DIVSQRT            ( CLUST_FP_DIVSQRT        ),
+                  .SHARED_FP             ( CLUST_SHARED_FP         ),
+                  .SHARED_FP_DIVSQRT     ( CLUST_SHARED_FP_DIVSQRT ),
+                  .APU_NARGS_CPU         ( APU_NARGS_CPU           ),
+                  .APU_WOP_CPU           ( APU_WOP_CPU             ),
+                  .WAPUTYPE              ( WAPUTYPE                ),
+                  .APU_NDSFLAGS_CPU      ( APU_NDSFLAGS_CPU        ),
+                  .APU_NUSFLAGS_CPU      ( APU_NUSFLAGS_CPU        ),
+                  .REMAP_ADDRESS         ( REMAP_ADDRESS           ),
+                  .CLUSTER_ALIAS_BASE    ( CLUSTER_ALIAS_BASE      ),
+                  .BOOT_ADDR             ( BOOT_ADDR               ),
+                  .DATA_WIDTH            ( DATA_WIDTH              ),
+                  .ADDR_WIDTH            ( ADDR_WIDTH              )
+  ) riscv_wrapper_i (
+                     .clk_cluster        ( clk_cluster     ),
+                     .s_rst_n            ( s_rst_n         ),
+                     .base_addr_i        ( base_addr_i     ),
+                     .s_init_n           ( s_init_n        ),
+                     .cluster_id_i       ( cluster_id_i    ),
+                     .clk_core_en        ( clk_core_en     ),
+                     .fetch_en_int       ( fetch_en_int    ),
+                     .boot_addr          ( boot_addr       ),
+                     .irq_id             ( irq_id          ),
+                     .irq_ack_id         ( irq_ack_id      ),
+                     .irq_req            ( irq_req         ),
+                     .irq_ack            ( irq_ack         ),
+                     .test_mode_i        ( test_mode_i     ),
+                     .core_busy          ( core_busy       ),
+                     .instr_req          ( instr_req       ),
+                     .instr_gnt          ( instr_gnt       ),
+                     .instr_addr         ( instr_addr      ),
+                     .instr_r_rdata      ( instr_r_rdata   ),
+                     .instr_r_valid      ( instr_r_valid   ),
+                     .s_core_dbg_irq     ( s_core_dbg_irq  ),
 `ifdef SHARED_FPU_CLUSTER
-        ,        
-        .apu_master_req_o      ( s_apu_master_req     [i] ),
-        .apu_master_gnt_i      ( s_apu_master_gnt     [i] ),
-        .apu_master_type_o     ( s_apu_master_type    [i] ),
-        .apu_master_operands_o ( s_apu_master_operands[i] ),
-        .apu_master_op_o       ( s_apu_master_op      [i] ),
-        .apu_master_flags_o    ( s_apu_master_flags   [i] ),
-        .apu_master_valid_i    ( s_apu_master_rvalid  [i] ),
-        .apu_master_ready_o    ( s_apu_master_rready  [i] ),
-        .apu_master_result_i   ( s_apu_master_rdata   [i] ),
-        .apu_master_flags_i    ( s_apu_master_rflags  [i] )
+                     .s_apu_master_req      ( s_apu_master_req      ),
+                     .s_apu_master_gnt      ( s_apu_master_gnt      ),
+                     .s_apu_master_type     ( s_apu_master_type     ),
+                     .s_apu_master_operands ( s_apu_master_operands ),
+                     .s_apu_master_op       ( s_apu_master_op       ),
+                     .s_apu_master_flags    ( s_apu_master_flags    ),
+                     .s_apu_master_rvalid   ( s_apu_master_rvalid   ),
+                     .s_apu_master_ready    ( s_apu_master_rready   ),
+                     .s_apu_master_rdata    ( s_apu_master_rdata    ),
 `endif
-      );
-    end
-  endgenerate
+                     .s_fregfile_disable    ( s_fregfile_disable    ),
+                     .s_dbg_irq             ( s_dbg_irq             ),
+                     .dbg_irq_valid_i       ( dbg_irq_valid_i       ),
 
+                     .s_core_euctrl_bus     ( s_core_euctrl_bus     ),
+                     .s_core_periph_bus     ( s_core_periph_bus     ),
+                     .core2lockstep         ( core2lockstep         )
+  );
 
 //**********************************************
 //**** APU cluster - Shared execution units ****
