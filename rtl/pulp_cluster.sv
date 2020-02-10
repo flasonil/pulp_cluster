@@ -271,7 +271,7 @@ module pulp_cluster
   //***************** SIGNALS DECLARATION ******************
   //********************************************************
    
-    
+  logic lockstep_mode;
   logic [NB_CORES-1:0]                fetch_enable_reg_int;
   logic [NB_CORES-1:0]                fetch_en_int;
   logic                               s_rst_n;
@@ -376,6 +376,8 @@ module pulp_cluster
   
   // cores & accelerators -> log interconnect
   XBAR_TCDM_BUS s_core_xbar_bus[NB_CORES+NB_HWPE_PORTS-1:0]();
+  XBAR_TCDM_BUS core2lockstep[NB_CORES+NB_HWPE_PORTS-1:0]();
+  XBAR_TCDM_BUS interconnect2lockstep[NB_CORES+NB_HWPE_PORTS-1:0]();
   
   // cores -> periph interconnect
   XBAR_PERIPH_BUS s_core_periph_bus[NB_CORES-1:0]();
@@ -677,7 +679,7 @@ module pulp_cluster
     .clk_i              ( clk_cluster                         ),
     .rst_ni             ( rst_ni                              ),
 
-    .core_tcdm_slave    ( s_core_xbar_bus                     ),
+    .core_tcdm_slave    ( interconnect2lockstep               ),
     .core_periph_slave  ( s_core_periph_bus                   ),
 
     .ext_slave          ( s_ext_xbar_bus                      ),
@@ -829,10 +831,122 @@ module pulp_cluster
   //         ╚██████╗╚██████╔╝██║  ██║███████╗            //
   //          ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝            //
   //------------------------------------------------------//
-  
+   XBAR_PERIPH_BUS lck_ctrl_master[NB_CORES-1:0]();
+	 logic                           is_hwlp_id_lck;
+	 logic [1:0]                     hwlp_dec_cnt_id_lck;
+	 logic                           instr_valid_id_lck;
+	 logic [31:0]                    instr_rdata_id_lck;
+	 logic                           is_compressed_id_lck;
+	 logic                           is_fetch_failed_id_lck;
+	 logic                           illegal_c_insn_id_lck;
+	 logic [31:0]                    pc_if_lck;
+	 logic [31:0]                    pc_id_lck;
   /* cluster cores + core-coupled accelerators / shared execution units */
+      pulp_sync dbg_irq_sync
+           (
+               .clk_i(clk_cluster),
+               .rstn_i(s_rst_n),
+               .serial_i(dbg_irq_valid_i[0]),
+               .serial_o(s_dbg_irq[0])
+           );
+
+      core_region #(
+        .CORE_ID             ( 0                  ),
+        .ADDR_WIDTH          ( 32                 ),
+        .DATA_WIDTH          ( 32                 ),
+        .INSTR_RDATA_WIDTH   ( INSTR_RDATA_WIDTH  ),
+        .CLUSTER_ALIAS_BASE  ( CLUSTER_ALIAS_BASE ),
+        .REMAP_ADDRESS       ( REMAP_ADDRESS      ),
+        .APU_NARGS_CPU       ( APU_NARGS_CPU      ), //= 2,
+        .APU_WOP_CPU         ( APU_WOP_CPU        ), //= 1,
+        .WAPUTYPE            ( WAPUTYPE           ), //= 3,
+        .APU_NDSFLAGS_CPU    ( APU_NDSFLAGS_CPU   ), //= 3,
+        .APU_NUSFLAGS_CPU    ( APU_NUSFLAGS_CPU   ), //= 5,
+
+        .FPU                 ( CLUST_FPU               ),
+        .FP_DIVSQRT          ( CLUST_FP_DIVSQRT        ),
+        .SHARED_FP           ( CLUST_SHARED_FP         ),
+        .SHARED_FP_DIVSQRT   ( CLUST_SHARED_FP_DIVSQRT )
+
+                    
+      ) core_0 (
+        .clk_i               ( clk_cluster           ),
+        .rst_ni              ( s_rst_n               ),
+        .base_addr_i         ( base_addr_i           ),
+        .lockstep_mode       ( lockstep_mode ),
+
+		    .is_hwlp_id_lck_o		         ( is_hwlp_id_lck			     ),
+		    .hwlp_dec_cnt_id_lck_o		   ( hwlp_dec_cnt_id_lck		 ),
+		    .instr_valid_id_lck_o		     ( instr_valid_id_lck			 ),
+		    .instr_rdata_id_lck_o		     ( instr_rdata_id_lck			 ),
+		    .is_compressed_id_lck_o		   ( is_compressed_id_lck		 ),
+		    .is_fetch_failed_id_lck_o		 ( is_fetch_failed_id_lck	 ),
+		    .illegal_c_insn_id_lck_o		 ( illegal_c_insn_id_lck	 ),
+		    .pc_if_lck_o		             ( pc_if_lck			         ),
+		    .pc_id_lck_o		             ( pc_id_lck			         ),
+		    .is_hwlp_id_lck_i		         (),
+		    .hwlp_dec_cnt_id_lck_i		   (),
+		    .instr_valid_id_lck_i		     (),
+		    .instr_rdata_id_lck_i		     (),
+		    .is_compressed_id_lck_i		   (),
+		    .is_fetch_failed_id_lck_i		 (),
+		    .illegal_c_insn_id_lck_i		 (),
+		    .pc_if_lck_i		             (),
+		    .pc_id_lck_i		             (),
+
+        .init_ni             ( s_init_n              ),
+        .cluster_id_i        ( cluster_id_i          ),
+        .clock_en_i          ( clk_core_en[0]        ),
+        .fetch_en_i          ( fetch_en_int[0]       ),
+       
+        .boot_addr_i         ( boot_addr[0]          ),
+        .irq_id_i            ( irq_id[0]             ),
+	      .irq_ack_id_o        ( irq_ack_id[0]         ),
+        .irq_req_i           ( irq_req[0]            ),
+        .irq_ack_o           ( irq_ack[0]            ),
+	
+        .test_mode_i         ( test_mode_i           ),
+        .core_busy_o         ( core_busy[0]          ),
+
+        //instruction cache bind 
+        .instr_req_o         ( instr_req[0]          ),
+        .instr_gnt_i         ( instr_gnt[0]          ),
+        .instr_addr_o        ( instr_addr[0]         ),
+        .instr_r_rdata_i     ( instr_r_rdata[0]      ),
+        .instr_r_valid_i     ( instr_r_valid[0]      ),
+
+        //debug unit bind
+        .debug_req_i         ( s_core_dbg_irq[0]     ),
+        //.debug_bus           ( s_debug_bus[i]        ),
+        //.debug_core_halted_o ( dbg_core_halted[i]    ),
+        //.debug_core_halt_i   ( dbg_core_halt[i]      ),
+        //.debug_core_resume_i ( dbg_core_resume[i]    ),
+        .tcdm_data_master    ( core2lockstep[0]    ),
+
+        //tcdm, dma ctrl unit, periph interco interfaces
+        //.dma_ctrl_master     ( s_core_dmactrl_bus[i] ),
+				.lck_ctrl_master		 (lck_ctrl_master[0]),
+        .eu_ctrl_master      ( s_core_euctrl_bus[0]  ),
+        .periph_data_master  ( s_core_periph_bus[0]  ),
+      
+        .fregfile_disable_i  (  s_fregfile_disable     )
+`ifdef SHARED_FPU_CLUSTER
+        ,        
+        .apu_master_req_o      ( s_apu_master_req     [0] ),
+        .apu_master_gnt_i      ( s_apu_master_gnt     [0] ),
+        .apu_master_type_o     ( s_apu_master_type    [0] ),
+        .apu_master_operands_o ( s_apu_master_operands[0] ),
+        .apu_master_op_o       ( s_apu_master_op      [0] ),
+        .apu_master_flags_o    ( s_apu_master_flags   [0] ),
+        .apu_master_valid_i    ( s_apu_master_rvalid  [0] ),
+        .apu_master_ready_o    ( s_apu_master_rready  [0] ),
+        .apu_master_result_i   ( s_apu_master_rdata   [0] ),
+        .apu_master_flags_i    ( s_apu_master_rflags  [0] )
+`endif
+      );
+
   generate
-    for (genvar i=0; i<NB_CORES; i++) begin : CORE
+    for (genvar i=1; i<NB_CORES; i++) begin : CORE
 
       pulp_sync dbg_irq_sync
            (
@@ -841,7 +955,6 @@ module pulp_cluster
                .serial_i(dbg_irq_valid_i[i]),
                .serial_o(s_dbg_irq[i])
            );
-
 
       core_region #(
         .CORE_ID             ( i                  ),
@@ -866,6 +979,26 @@ module pulp_cluster
         .clk_i               ( clk_cluster           ),
         .rst_ni              ( s_rst_n               ),
         .base_addr_i         ( base_addr_i           ),
+        .lockstep_mode       ( lockstep_mode ),
+
+		    .is_hwlp_id_lck_i		         ( is_hwlp_id_lck			     ),
+		    .hwlp_dec_cnt_id_lck_i		   ( hwlp_dec_cnt_id_lck		 ),
+		    .instr_valid_id_lck_i		     ( instr_valid_id_lck			 ),
+		    .instr_rdata_id_lck_i		     ( instr_rdata_id_lck			 ),
+		    .is_compressed_id_lck_i		   ( is_compressed_id_lck		 ),
+		    .is_fetch_failed_id_lck_i		 ( is_fetch_failed_id_lck	 ),
+		    .illegal_c_insn_id_lck_i		 ( illegal_c_insn_id_lck	 ),
+		    .pc_if_lck_i		             ( pc_if_lck			         ),
+		    .pc_id_lck_i		             ( pc_id_lck			         ),
+		    .is_hwlp_id_lck_o		         (),
+		    .hwlp_dec_cnt_id_lck_o		   (),
+		    .instr_valid_id_lck_o		     (),
+		    .instr_rdata_id_lck_o		     (),
+		    .is_compressed_id_lck_o		   (),
+		    .is_fetch_failed_id_lck_o		 (),
+		    .illegal_c_insn_id_lck_o		 (),
+		    .pc_if_lck_o		             (),
+		    .pc_id_lck_o		             (),
 
         .init_ni             ( s_init_n              ),
         .cluster_id_i        ( cluster_id_i          ),
@@ -894,10 +1027,11 @@ module pulp_cluster
         //.debug_core_halted_o ( dbg_core_halted[i]    ),
         //.debug_core_halt_i   ( dbg_core_halt[i]      ),
         //.debug_core_resume_i ( dbg_core_resume[i]    ),
-        .tcdm_data_master    ( s_core_xbar_bus[i]    ),
+        .tcdm_data_master    ( core2lockstep[i]    ),
 
         //tcdm, dma ctrl unit, periph interco interfaces
         //.dma_ctrl_master     ( s_core_dmactrl_bus[i] ),
+				.lck_ctrl_master		 (lck_ctrl_master[i]),
         .eu_ctrl_master      ( s_core_euctrl_bus[i]  ),
         .periph_data_master  ( s_core_periph_bus[i]  ),
       
@@ -1601,4 +1735,23 @@ module pulp_cluster
   assign s_data_master_async.b_user         = data_master_b_user_i;
   assign data_master_b_readpointer_o        = s_data_master_async.b_readpointer;
    
+
+lockstep_ctrl_wrap #(
+ .ID_WIDTH (NB_CORES+NB_MPERIPHS)
+ ) lockstep_ctrl_wrap_i (
+  .clk_i(clk_i),
+  .rst_ni(s_rst_n),
+  .speriph_slave(lck_ctrl_master),
+  .lockstep_mode(lockstep_mode)
+ );
+
+lockstep_unit_wrap lockstep_unit_wrap_i
+(
+ .clk_i(clk_i),
+ .rst_ni(s_rst_n),
+ .lockstep2core(core2lockstep),
+ .lockstep2interconnect(interconnect2lockstep),
+ .lockstep_mode(lockstep_mode)
+);
+
 endmodule

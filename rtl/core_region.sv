@@ -60,32 +60,53 @@ module core_region
   input logic 			      clk_i,
   input logic 			      rst_ni,
   input logic 			      init_ni,
+  input logic             lockstep_mode,
 
-  input logic [3:0] 		      base_addr_i, // FOR CLUSTER VIRTUALIZATION
+  output logic                           is_hwlp_id_lck_o,
+  output logic [1:0]                     hwlp_dec_cnt_id_lck_o,
+  output logic                           instr_valid_id_lck_o,
+  output logic [31:0]                    instr_rdata_id_lck_o,
+  output logic                           is_compressed_id_lck_o,
+  output logic                           is_fetch_failed_id_lck_o,
+  output logic                           illegal_c_insn_id_lck_o,
+  output logic [31:0]                    pc_if_lck_o,
+  output logic [31:0]                    pc_id_lck_o,
 
-  input logic [5:0] 		      cluster_id_i,
+  input logic                            is_hwlp_id_lck_i,
+  input logic [1:0]                      hwlp_dec_cnt_id_lck_i,
+  input logic                            instr_valid_id_lck_i,
+  input logic [31:0]                     instr_rdata_id_lck_i,
+  input logic                            is_compressed_id_lck_i,
+  input logic                            is_fetch_failed_id_lck_i,
+  input logic                            illegal_c_insn_id_lck_i,
+  input logic [31:0]                     pc_if_lck_i,
+  input logic [31:0]                     pc_id_lck_i,
+
+  input logic [3:0] 		  base_addr_i, // FOR CLUSTER VIRTUALIZATION
+
+  input logic [5:0] 		  cluster_id_i,
   
   input logic 			      irq_req_i,
   output logic 			      irq_ack_o,
-  input logic [4:0] 		      irq_id_i,
-  output logic [4:0] 		      irq_ack_id_o,
+  input logic [4:0] 		  irq_id_i,
+  output logic [4:0] 		  irq_ack_id_o,
   
   input logic 			      clock_en_i,
   input logic 			      fetch_en_i,
   input logic 			      fregfile_disable_i,
 
-  input logic [31:0] 		      boot_addr_i,
+  input logic [31:0] 		  boot_addr_i,
 
   input logic 			      test_mode_i,
 
   output logic 			      core_busy_o,
 
   // Interface to Instruction Logarithmic interconnect (Req->grant handshake)
-  output logic 			      instr_req_o,
-  input logic 			      instr_gnt_i,
-  output logic [31:0] 		      instr_addr_o,
+  output logic 			                  instr_req_o,
+  input logic 			                  instr_gnt_i,
+  output logic [31:0] 		            instr_addr_o,
   input logic [INSTR_RDATA_WIDTH-1:0] instr_r_rdata_i,
-  input logic 			      instr_r_valid_i,
+  input logic 			                  instr_r_valid_i,
 
   input logic             debug_req_i,
 				      
@@ -98,6 +119,7 @@ module core_region
 				      XBAR_TCDM_BUS.Master tcdm_data_master,
 				      //XBAR_TCDM_BUS.Master dma_ctrl_master,
 				      XBAR_PERIPH_BUS.Master eu_ctrl_master,
+XBAR_PERIPH_BUS.Master lck_ctrl_master,
 				      XBAR_PERIPH_BUS.Master periph_data_master
 
 
@@ -140,7 +162,7 @@ module core_region
   //********************************************************
   //***************** SIGNALS DECLARATION ******************
   //********************************************************
-
+	XBAR_PERIPH_BUS   eu_lck_master_bus();
   XBAR_DEMUX_BUS    s_core_bus();         // Internal interface between CORE       <--> DEMUX
   XBAR_PERIPH_BUS   periph_demux_bus();   // Internal interface between CORE_DEMUX <--> PERIPHERAL DEMUX
 
@@ -207,6 +229,26 @@ module core_region
     .core_id_i             ( CORE_ID[3:0]      ),
     .cluster_id_i          ( cluster_id_i      ),
 
+   .lockstep_mode             ( lockstep_mode             ),
+   .is_hwlp_id							  ( is_hwlp_id_lck_o					),
+   .hwlp_dec_cnt_id					  ( hwlp_dec_cnt_id_lck_o			),
+   .instr_valid_id					  ( instr_valid_id_lck_o			),
+   .instr_rdata_id					  ( instr_rdata_id_lck_o			),
+   .is_compressed_id				  ( is_compressed_id_lck_o		),
+   .is_fetch_failed_id			  ( is_fetch_failed_id_lck_o	),
+   .illegal_c_insn_id				  ( illegal_c_insn_id_lck_o		),
+   .pc_if										  ( pc_if_lck_o					      ),
+   .pc_id										  ( pc_id_lck_o					      ),
+   .is_hwlp_id_lck_i					( is_hwlp_id_lck_i					),
+   .hwlp_dec_cnt_id_lck_i			( hwlp_dec_cnt_id_lck_i			),
+   .instr_valid_id_lck_i			( instr_valid_id_lck_i			),
+   .instr_rdata_id_lck_i			( instr_rdata_id_lck_i			),
+   .is_compressed_id_lck_i		( is_compressed_id_lck_i		),
+   .is_fetch_failed_id_lck_i	( is_fetch_failed_id_lck_i	),
+   .illegal_c_insn_id_lck_i		( illegal_c_insn_id_lck_i		),
+   .pc_if_lck_i							  ( pc_if_lck_i					      ),
+   .pc_id_lck_i							  ( pc_id_lck_i					      ),
+
     .instr_addr_o          ( instr_addr_o             ),
     .instr_req_o           ( instr_req_o              ),
     .instr_rdata_i         ( instr_r_rdata_i          ),
@@ -268,7 +310,37 @@ module core_region
   //********************************************************
   //****** DEMUX TO TCDM AND PERIPHERAL INTERCONNECT *******
   //********************************************************
-   
+   periph_demux periph_demux_i (
+	.clk													(clk_int),
+	.rst_ni												(rst_ni),
+	.data_req_i										(eu_lck_master_bus.req),
+	.data_add_i										(eu_lck_master_bus.add),
+	.data_wen_i										(eu_lck_master_bus.wen),
+	.data_wdata_i									(eu_lck_master_bus.wdata),
+	.data_be_i										(eu_lck_master_bus.be),
+	.data_gnt_o										(eu_lck_master_bus.gnt),
+	.data_r_valid_o								(eu_lck_master_bus.r_valid),
+	.data_r_rdata_o								(eu_lck_master_bus.r_rdata),
+	.data_r_opc_o									(eu_lck_master_bus.r_opc),
+	.data_req_o_MH								(lck_ctrl_master.req),
+	.data_add_o_MH								(lck_ctrl_master.add),
+	.data_wen_o_MH								(lck_ctrl_master.wen),
+	.data_wdata_o_MH							(lck_ctrl_master.wdata),
+	.data_be_o_MH									(lck_ctrl_master.be),
+	.data_gnt_i_MH								(lck_ctrl_master.gnt),
+	.data_r_valid_i_MH						(lck_ctrl_master.r_valid),
+	.data_r_rdata_i_MH						(lck_ctrl_master.r_rdata),
+	.data_r_opc_i_MH							(lck_ctrl_master.r_opc),
+	.data_req_o_EU								(eu_ctrl_master.req),
+	.data_add_o_EU								(eu_ctrl_master.add),
+	.data_wen_o_EU								(eu_ctrl_master.wen),
+	.data_wdata_o_EU							(eu_ctrl_master.wdata),
+	.data_be_o_EU									(eu_ctrl_master.be),
+	.data_gnt_i_EU								(eu_ctrl_master.gnt),
+	.data_r_valid_i_EU						(eu_ctrl_master.r_valid),
+	.data_r_rdata_i_EU						(eu_ctrl_master.r_rdata),
+	.data_r_opc_i_EU							(eu_ctrl_master.r_opc)
+);   
   // demuxes to TCDM & memory hierarchy
   core_demux #(
     .ADDR_WIDTH         ( 32                 ),
@@ -303,15 +375,15 @@ module core_region
     .data_r_valid_i_SH  (  tcdm_data_master.r_valid   ),
     .data_r_rdata_i_SH  (  tcdm_data_master.r_rdata   ),
 
-    .data_req_o_EXT     (  eu_ctrl_master.req         ),
-    .data_add_o_EXT     (  eu_ctrl_master.add         ),
-    .data_wen_o_EXT     (  eu_ctrl_master.wen         ),
-    .data_wdata_o_EXT   (  eu_ctrl_master.wdata       ),
-    .data_be_o_EXT      (  eu_ctrl_master.be          ),
-    .data_gnt_i_EXT     (  eu_ctrl_master.gnt         ),
-    .data_r_valid_i_EXT (  eu_ctrl_master.r_valid     ),
-    .data_r_rdata_i_EXT (  eu_ctrl_master.r_rdata     ),
-    .data_r_opc_i_EXT   (  eu_ctrl_master.r_opc       ),
+    .data_req_o_EXT     (  eu_lck_master_bus.req         ),
+    .data_add_o_EXT     (  eu_lck_master_bus.add         ),
+    .data_wen_o_EXT     (  eu_lck_master_bus.wen         ),
+    .data_wdata_o_EXT   (  eu_lck_master_bus.wdata       ),
+    .data_be_o_EXT      (  eu_lck_master_bus.be          ),
+    .data_gnt_i_EXT     (  eu_lck_master_bus.gnt         ),
+    .data_r_valid_i_EXT (  eu_lck_master_bus.r_valid     ),
+    .data_r_rdata_i_EXT (  eu_lck_master_bus.r_rdata     ),
+    .data_r_opc_i_EXT   (  eu_lck_master_bus.r_opc       ),
 
     // .data_req_o_EXT     (  periph_demux_bus.req       ),
     // .data_add_o_EXT     (  periph_demux_bus.add       ),
