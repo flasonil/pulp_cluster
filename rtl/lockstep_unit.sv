@@ -105,7 +105,6 @@ module lockstep_unit
         rdata7 = rdata_i7;
 
       //FSM to set 0 req_o
-<<<<<<< HEAD
       if(same_address)begin
          req_o0 = req_i0;
          req_o1 = 1'b0;
@@ -125,27 +124,6 @@ module lockstep_unit
          req_o6 = req_i6;
          req_o7 = req_i7;
       end
-=======
-if(same_address)begin
-req_o0 = req_i0;
-req_o1 = 1'b0;
-req_o2 = 1'b0;
-req_o3 = 1'b0;
-req_o4 = 1'b0;
-req_o5 = 1'b0;
-req_o6 = 1'b0;
-req_o7 = 1'b0;
-end else begin
-req_o0 = req_i0;
-req_o1 = req_i1;
-req_o2 = req_i2;
-req_o3 = req_i3;
-req_o4 = req_i4;
-req_o5 = req_i5;
-req_o6 = req_i6;
-req_o7 = req_i7;
-end
->>>>>>> ec01685482da019a65b84ba6d88eaa83b782e3c3
 /*      case(CS0)
         IDLE:begin
 					 if(same_address) req_o0 = req_i0;
@@ -338,16 +316,14 @@ end
            if(outgnt) NS7 = IDLE;
 	         //else NS7 = GRANT_RECEIVED;
         end
-<<<<<<< HEAD
       endcase // case (CS)
 */      
 			if(same_address)//DATA BROADCAST: we send only one request to memory
         nreq = 1;
       else
         nreq = req_i7+req_i6+req_i5+req_i4+req_i3+req_i2+req_i1+req_i0;//Otherwise we count the number of simultaneous requests
-=======
+
       endcase // case (CS)*/
->>>>>>> ec01685482da019a65b84ba6d88eaa83b782e3c3
       
       if(!same_address)begin      
 			   if((nreq!=0)&&((cntgnt+(gnt_i0+gnt_i1+gnt_i2+gnt_i3+gnt_i4+gnt_i5+gnt_i6+gnt_i7)) == nreq)) begin
