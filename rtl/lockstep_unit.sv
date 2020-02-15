@@ -126,7 +126,7 @@ module lockstep_unit
         GRANT_RECEIVED:begin
            req_o0 = 1'b0;
            if(outgnt) NS0 = IDLE;
-	         //else NS0 = GRANT_RECEIVED;
+	         else NS0 = GRANT_RECEIVED;
         end
       endcase // case (CS)
       case(CS1)
@@ -150,7 +150,7 @@ module lockstep_unit
         GRANT_RECEIVED:begin
            req_o1 = 1'b0;
            if(outgnt) NS1 = IDLE;
-	         //else NS1 = GRANT_RECEIVED;
+	         else NS1 = GRANT_RECEIVED;
         end
       endcase // case (CS)
       case(CS2)
@@ -174,7 +174,7 @@ module lockstep_unit
         GRANT_RECEIVED:begin
            req_o2 = 1'b0;
            if(outgnt) NS2 = IDLE;
-	         //else NS2 = GRANT_RECEIVED;
+	         else NS2 = GRANT_RECEIVED;
         end
       endcase // case (CS)
       case(CS3)
@@ -199,7 +199,7 @@ module lockstep_unit
         GRANT_RECEIVED:begin
            req_o3 = 1'b0;
            if(outgnt) NS3 = IDLE;
-	         //else NS3 = GRANT_RECEIVED;
+	         else NS3 = GRANT_RECEIVED;
         end
       endcase // case (CS)
       case(CS4)
@@ -223,7 +223,7 @@ module lockstep_unit
         GRANT_RECEIVED:begin
            req_o4 = 1'b0;
            if(outgnt) NS4 = IDLE;
-	         //else NS4 = GRANT_RECEIVED;
+	         else NS4 = GRANT_RECEIVED;
         end
       endcase // case (CS)
       case(CS5)
@@ -247,7 +247,7 @@ module lockstep_unit
         GRANT_RECEIVED:begin
            req_o5 = 1'b0;
            if(outgnt) NS5 = IDLE;
-	         //else NS5 = GRANT_RECEIVED;
+	         else NS5 = GRANT_RECEIVED;
         end
       endcase // case (CS)
       case(CS6)
@@ -271,7 +271,7 @@ module lockstep_unit
         GRANT_RECEIVED:begin
            req_o6 = 1'b0;
            if(outgnt) NS6 = IDLE;
-	         //else NS6 = GRANT_RECEIVED;
+	         else NS6 = GRANT_RECEIVED;
         end
       endcase // case (CS)
       case(CS7)
@@ -295,7 +295,7 @@ module lockstep_unit
         GRANT_RECEIVED:begin
            req_o7 = 1'b0;
            if(outgnt) NS7 = IDLE;
-	         //else NS7 = GRANT_RECEIVED;
+	         else NS7 = GRANT_RECEIVED;
         end
       endcase // case (CS)
       
@@ -303,8 +303,6 @@ module lockstep_unit
         nreq = 1;
       else
         nreq = req_i7+req_i6+req_i5+req_i4+req_i3+req_i2+req_i1+req_i0;//Otherwise we count the number of simultaneous requests
-
-      endcase // case (CS)*/
       
       if(!same_address)begin      
 			   if((nreq!=0)&&((cntgnt+(gnt_i0+gnt_i1+gnt_i2+gnt_i3+gnt_i4+gnt_i5+gnt_i6+gnt_i7)) == nreq)) begin
