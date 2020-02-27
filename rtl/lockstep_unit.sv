@@ -110,9 +110,12 @@ module lockstep_unit
 					 if(same_address) req_o0 = req_i0;
            else begin
 					  req_o0 = req_i0;
-            if(req_i0&&gnt_i0) NS0 = GRANT_RECEIVED;
-            else if(req_i0&&(!gnt_i0)) NS0 = WAITING_GRANT;
-            else NS0 = IDLE;
+						if ((gnt_i0+gnt_i1+gnt_i2+gnt_i3+gnt_i4+gnt_i5+gnt_i6+gnt_i7) == nreq) NS0 = IDLE;
+						else begin
+            	if(req_i0&&gnt_i0) NS0 = GRANT_RECEIVED;
+            	else if(req_i0&&(!gnt_i0)) NS0 = WAITING_GRANT;
+            	else NS0 = IDLE;
+						end
 					 end
         end
         WAITING_GRANT:begin
@@ -134,9 +137,12 @@ module lockstep_unit
 					 if(same_address) req_o1 = 1'b0;
            else begin
 					  req_o1 = req_i1;
-            if(req_i1&&gnt_i1) NS1 = GRANT_RECEIVED;
-            else if(req_i1&&(!gnt_i1)) NS1 = WAITING_GRANT;
-            else NS1 = IDLE;
+						if ((gnt_i0+gnt_i1+gnt_i2+gnt_i3+gnt_i4+gnt_i5+gnt_i6+gnt_i7) == nreq) NS1 = IDLE;
+						else begin
+            	if(req_i1&&gnt_i1) NS1 = GRANT_RECEIVED;
+            	else if(req_i1&&(!gnt_i1)) NS1 = WAITING_GRANT;
+            	else NS1 = IDLE;
+						end
 					 end
         end
         WAITING_GRANT:begin
@@ -158,9 +164,12 @@ module lockstep_unit
 					 if(same_address) req_o2 = 1'b0;
            else begin
 					  req_o2 = req_i2;
-            if(req_i2&&gnt_i2) NS2 = GRANT_RECEIVED;
-            else if(req_i2&&(!gnt_i2)) NS2 = WAITING_GRANT;
-            else NS2 = IDLE;
+						if ((gnt_i0+gnt_i1+gnt_i2+gnt_i3+gnt_i4+gnt_i5+gnt_i6+gnt_i7) == nreq) NS2 = IDLE;
+						else begin
+            	if(req_i2&&gnt_i2) NS2 = GRANT_RECEIVED;
+            	else if(req_i2&&(!gnt_i2)) NS2 = WAITING_GRANT;
+            	else NS2 = IDLE;
+						end
 					 end
         end
         WAITING_GRANT:begin
@@ -182,9 +191,12 @@ module lockstep_unit
 					 if(same_address) req_o3 = 1'b0;
            else begin
 					  req_o3 = req_i3;
-            if(req_i3&&gnt_i3) NS3 = GRANT_RECEIVED;
-            else if(req_i3&&(!gnt_i3)) NS3 = WAITING_GRANT;
-            else NS3 = IDLE;
+						if ((gnt_i0+gnt_i1+gnt_i2+gnt_i3+gnt_i4+gnt_i5+gnt_i6+gnt_i7) == nreq) NS3 = IDLE;
+						else begin
+            	if(req_i3&&gnt_i3) NS3 = GRANT_RECEIVED;
+            	else if(req_i3&&(!gnt_i3)) NS3 = WAITING_GRANT;
+            	else NS3 = IDLE;
+						end
 					 end
         end
         WAITING_GRANT:begin
@@ -207,9 +219,12 @@ module lockstep_unit
 					 if(same_address) req_o4 = 1'b0;
            else begin
 					  req_o4 = req_i4;
-            if(req_i4&&gnt_i4) NS4 = GRANT_RECEIVED;
-            else if(req_i4&&(!gnt_i4)) NS4 = WAITING_GRANT;
-            else NS4 = IDLE;
+						if ((gnt_i0+gnt_i1+gnt_i2+gnt_i3+gnt_i4+gnt_i5+gnt_i6+gnt_i7) == nreq) NS4 = IDLE;
+						else begin
+            	if(req_i4&&gnt_i4) NS4 = GRANT_RECEIVED;
+            	else if(req_i4&&(!gnt_i4)) NS4 = WAITING_GRANT;
+            	else NS4 = IDLE;
+						end
 					 end
         end
         WAITING_GRANT:begin
@@ -231,9 +246,12 @@ module lockstep_unit
 					 if(same_address) req_o5 = 1'b0;
            else begin
 					  req_o5 = req_i5;
-            if(req_i5&&gnt_i5) NS5 = GRANT_RECEIVED;
-            else if(req_i5&&(!gnt_i5)) NS5 = WAITING_GRANT;
-            else NS5 = IDLE;
+						if ((gnt_i0+gnt_i1+gnt_i2+gnt_i3+gnt_i4+gnt_i5+gnt_i6+gnt_i7) == nreq) NS5 = IDLE;
+						else begin
+            	if(req_i5&&gnt_i5) NS5 = GRANT_RECEIVED;
+            	else if(req_i5&&(!gnt_i5)) NS5 = WAITING_GRANT;
+            	else NS5 = IDLE;
+						end
 					 end
         end
         WAITING_GRANT:begin
@@ -255,9 +273,12 @@ module lockstep_unit
 					 if(same_address) req_o6 = 1'b0;
            else begin
 					  req_o6 = req_i6;
-            if(req_i6&&gnt_i6) NS6 = GRANT_RECEIVED;
-            else if(req_i6&&(!gnt_i6)) NS6 = WAITING_GRANT;
-            else NS6 = IDLE;
+						if ((gnt_i0+gnt_i1+gnt_i2+gnt_i3+gnt_i4+gnt_i5+gnt_i6+gnt_i7) == nreq) NS6 = IDLE;
+						else begin
+            	if(req_i6&&gnt_i6) NS6 = GRANT_RECEIVED;
+            	else if(req_i6&&(!gnt_i6)) NS6 = WAITING_GRANT;
+            	else NS6 = IDLE;
+						end
 					 end
         end
         WAITING_GRANT:begin
@@ -279,9 +300,12 @@ module lockstep_unit
 					 if(same_address) req_o7 = 1'b0;
            else begin
 					  req_o7 = req_i7;
-            if(req_i7&&gnt_i7) NS7 = GRANT_RECEIVED;
-            else if(req_i7&&(!gnt_i7)) NS7 = WAITING_GRANT;
-            else NS7 = IDLE;
+						if ((gnt_i0+gnt_i1+gnt_i2+gnt_i3+gnt_i4+gnt_i5+gnt_i6+gnt_i7) == nreq) NS7 = IDLE;
+						else begin
+            	if(req_i7&&gnt_i7) NS7 = GRANT_RECEIVED;
+            	else if(req_i7&&(!gnt_i7)) NS7 = WAITING_GRANT;
+            	else NS7 = IDLE;
+						end
 					 end
         end
         WAITING_GRANT:begin
