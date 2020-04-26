@@ -74,7 +74,8 @@ module lockstep_ctrl
  output logic r_opc_o6,
  output logic r_opc_o7,
 
- output logic lockstep_mode
+ output logic lockstep_mode_if,
+ output logic lockstep_mode_id
 );
 logic [31:0] lockstep_ctrl_reg,lockstep_ctrl;
 
@@ -87,7 +88,8 @@ assign r_opc_o5 = 1'b0;
 assign r_opc_o6 = 1'b0;
 assign r_opc_o7 = 1'b0;
 assign req_i = req_i0&req_i1&req_i2&req_i3&req_i4&req_i5&req_i6&req_i7;
-assign lockstep_mode = lockstep_ctrl_reg[0];
+assign lockstep_mode_if = lockstep_ctrl_reg[0];
+assign lockstep_mode_id = lockstep_ctrl_reg[1];
 
 enum logic [1:0] {TRANS_IDLE,TRANS_RUN} CS, NS;
 

@@ -271,7 +271,8 @@ module pulp_cluster
   //***************** SIGNALS DECLARATION ******************
   //********************************************************
    
-  logic lockstep_mode;
+  logic lockstep_mode_if;
+  logic lockstep_mode_id;
   logic [NB_CORES-1:0]                fetch_enable_reg_int;
   logic [NB_CORES-1:0]                fetch_en_int;
   logic                               s_rst_n;
@@ -841,6 +842,102 @@ module pulp_cluster
 	 logic                           illegal_c_insn_id_lck;
 	 logic [31:0]                    pc_if_lck;
 	 logic [31:0]                    pc_id_lck;
+ 	 logic [5:0]  regfile_addr_ra_id_lck;
+	 logic [5:0]  regfile_addr_rb_id_lck;
+	 logic [5:0]  regfile_addr_rc_id_lck;
+
+	//IF-ID LOCKSTEP
+	//logic        						alu_en_ex_lck;
+  //logic [6:0]							alu_operator_ex_lck;
+  logic [ 4:0] 						bmask_a_ex_lck;
+  logic [ 4:0] 						bmask_b_ex_lck;
+  logic [ 1:0] 						alu_vec_mode_ex_lck;
+  logic        						alu_is_clpx_ex_lck, alu_is_subrot_ex_lck;
+  logic [ 1:0] 						alu_clpx_shift_ex_lck;
+  //logic [ 2:0] 						mult_operator_ex_lck;
+  //logic        						mult_en_ex_lck;
+  logic        						mult_sel_subword_ex_lck;
+  logic [ 1:0] 						mult_signed_mode_ex_lck;
+  logic [ 4:0] 						mult_imm_ex_lck;
+  logic [ 1:0] 						mult_dot_signed_ex_lck;
+  logic        						mult_is_clpx_ex_lck;
+  logic [ 1:0] 						mult_clpx_shift_ex_lck;
+  logic        						mult_clpx_img_ex_lck;
+	logic										csr_access_ex_lck;
+  logic  [1:0]						csr_op_ex_lck;
+  logic        						csr_irq_sec_lck;
+  logic        						csr_save_if_lck;
+  logic        						csr_save_id_lck;
+  logic        						csr_save_ex_lck;
+  logic [5:0]  						csr_cause_lck;
+  logic						        csr_save_cause_lck;
+  logic						        csr_restore_mret_id_lck;
+  logic						        csr_restore_uret_id_lck;
+  logic						        csr_restore_dret_id_lck;
+  logic       						data_misaligned_ex_lck;
+	//logic 									useincr_addr_ex_lck;
+	logic										data_err_ack_lck;
+  logic        						debug_mode_lck;
+  logic [2:0]  						debug_cause_lck;
+  logic        						debug_csr_save_lck;
+  logic        						perf_jump_lck;
+  logic        						perf_jr_stall_lck;
+  logic       						perf_ld_stall_lck;
+  logic        						perf_pipeline_stall_lck;
+	logic										id_valid_lck;
+	logic [31:0]						pc_ex_lck;
+  logic                        apu_en_ex_lck;
+  logic [WAPUTYPE-1:0]         apu_type_ex_lck;
+  logic [APU_NDSFLAGS_CPU-1:0] apu_flags_ex_lck;
+  logic [APU_WOP_CPU-1:0]      apu_op_ex_lck;
+  logic [1:0]                  apu_lat_ex_lck;
+  logic [5:0]                  apu_waddr_ex_lck;
+  logic [5:0]  						regfile_waddr_ex_lck;
+  logic        						regfile_we_ex_lck;
+  logic [5:0]  						regfile_alu_waddr_ex_lck;
+  logic        						regfile_alu_we_ex_lck;
+  logic [31:0] imm_i_type_lck;
+  logic [31:0] imm_iz_type_lck;
+ 	logic [31:0] imm_s_type_lck;
+ 	logic [31:0] imm_sb_type_lck;
+  logic [31:0] imm_u_type_lck;
+  logic [31:0] imm_uj_type_lck;
+  logic [31:0] imm_z_type_lck;
+  logic [31:0] imm_s2_type_lck;
+  logic [31:0] imm_bi_type_lck;
+  logic [31:0] imm_s3_type_lck;
+  logic [31:0] imm_vs_type_lck;
+  logic [31:0] imm_vu_type_lck;
+  logic [31:0] imm_shuffleb_type_lck;
+  logic [31:0] imm_shuffleh_type_lck;
+  logic [31:0] imm_clip_type_lck;
+  logic [2:0]  alu_op_a_mux_sel_lck;
+  logic [2:0]  alu_op_b_mux_sel_lck;
+  logic [1:0]  alu_op_c_mux_sel_lck;
+  logic [0:0]  imm_a_mux_sel_lck;
+  logic [3:0]  imm_b_mux_sel_lck;
+  logic [1:0]  operand_a_fw_mux_sel_lck;
+  logic [1:0]  operand_b_fw_mux_sel_lck;
+  logic [1:0]  operand_c_fw_mux_sel_lck;
+	logic prepost_useincr_lck;
+  logic        alu_en_lck;
+  logic [6:0] alu_operator_lck;
+  logic [2:0]  mult_operator_lck;
+  logic        mult_en_lck;
+	logic				mult_dot_en_lck;
+	logic        mult_int_en_lck;
+  logic        misaligned_stall_lck;
+  logic        jr_stall_lck;
+  logic        load_stall_lck;
+	logic [1:0]  jump_in_id_lck;
+  logic        data_we_id_lck;
+  logic [1:0]  data_type_id_lck;
+  logic [1:0]  data_sign_ext_id_lck;
+  logic [1:0]  data_reg_offset_id_lck;
+  logic        data_req_id_lck;
+  logic        data_load_event_id_lck;
+
+
   /* cluster cores + core-coupled accelerators / shared execution units */
       pulp_sync dbg_irq_sync
            (
@@ -873,7 +970,8 @@ module pulp_cluster
         .clk_i               ( clk_cluster           ),
         .rst_ni              ( s_rst_n               ),
         .base_addr_i         ( base_addr_i           ),
-        .lockstep_mode       ( lockstep_mode ),
+        .lockstep_mode_if    ( lockstep_mode_if ),
+				.lockstep_mode_id		 ( lockstep_mode_id ),
 
 		    .is_hwlp_id_lck_o		         ( is_hwlp_id_lck			     ),
 		    .hwlp_dec_cnt_id_lck_o		   ( hwlp_dec_cnt_id_lck		 ),
@@ -893,6 +991,186 @@ module pulp_cluster
 		    .illegal_c_insn_id_lck_i		 (),
 		    .pc_if_lck_i		             (),
 		    .pc_id_lck_i		             (),
+
+		//IF-ID LOCKSTEP
+.bmask_a_ex_lck_o										(bmask_a_ex_lck									),
+.bmask_b_ex_lck_o										(bmask_b_ex_lck			),
+.alu_vec_mode_ex_lck_o							(alu_vec_mode_ex_lck),
+.alu_is_clpx_ex_lck_o								(alu_is_clpx_ex_lck),
+.alu_is_subrot_ex_lck_o							(alu_is_subrot_ex_lck),
+.alu_clpx_shift_ex_lck_o						(alu_clpx_shift_ex_lck),
+.mult_sel_subword_ex_lck_o					(mult_sel_subword_ex_lck),
+.mult_signed_mode_ex_lck_o					(mult_signed_mode_ex_lck),
+.mult_imm_ex_lck_o									(mult_imm_ex_lck),
+.mult_dot_signed_ex_lck_o						(mult_dot_signed_ex_lck),
+.mult_is_clpx_ex_lck_o							(mult_is_clpx_ex_lck),
+.mult_clpx_shift_ex_lck_o						(mult_clpx_shift_ex_lck),
+.mult_clpx_img_ex_lck_o							(mult_clpx_img_ex_lck),
+.csr_access_ex_lck_o								(csr_access_ex_lck),
+.csr_op_ex_lck_o										(csr_op_ex_lck),
+.csr_irq_sec_lck_o									(csr_irq_sec_lck),
+.csr_save_if_lck_o									(csr_save_if_lck),
+.csr_save_id_lck_o									(csr_save_id_lck),
+.csr_save_ex_lck_o									(csr_save_ex_lck),
+.csr_cause_lck_o										(csr_cause_lck),
+.csr_save_cause_lck_o								(csr_save_cause_lck),
+.csr_restore_mret_id_lck_o					(csr_restore_mret_id_lck),
+.csr_restore_uret_id_lck_o					(csr_restore_uret_id_lck),
+.csr_restore_dret_id_lck_o					(csr_restore_dret_id_lck),
+.data_misaligned_ex_lck_o						(data_misaligned_ex_lck),
+.data_err_ack_lck_o									(data_err_ack_lck),
+.debug_mode_lck_o										(debug_mode_lck),
+.debug_cause_lck_o									(debug_cause_lck),
+.debug_csr_save_lck_o								(debug_csr_save_lck),
+.perf_jump_lck_o										(perf_jump_lck),
+.perf_jr_stall_lck_o								(perf_jr_stall_lck),
+.perf_ld_stall_lck_o								(perf_ld_stall_lck),
+.perf_pipeline_stall_lck_o					(perf_pipeline_stall_lck),
+.id_valid_lck_o											(id_valid_lck),
+.pc_ex_lck_o												(pc_ex_lck),
+.apu_en_ex_lck_o										(apu_en_ex_lck),
+.apu_type_ex_lck_o									(apu_type_ex_lck),
+.apu_flags_ex_lck_o									(apu_flags_ex_lck),
+.apu_op_ex_lck_o										(apu_op_ex_lck),
+.apu_lat_ex_lck_o										(apu_lat_ex_lck),
+.apu_waddr_ex_lck_o									(apu_waddr_ex_lck),
+.regfile_waddr_ex_lck_o							(regfile_waddr_ex_lck),
+.regfile_we_ex_lck_o								(regfile_we_ex_lck),
+.regfile_alu_waddr_ex_lck_o					(regfile_alu_waddr_ex_lck),
+.regfile_alu_we_ex_lck_o						(regfile_alu_we_ex_lck),
+.bmask_a_ex_lck_i										(),
+.bmask_b_ex_lck_i										(),
+.alu_vec_mode_ex_lck_i							(),
+.alu_is_clpx_ex_lck_i								(),
+.alu_is_subrot_ex_lck_i							(),
+.alu_clpx_shift_ex_lck_i						(),
+.mult_sel_subword_ex_lck_i					(),
+.mult_signed_mode_ex_lck_i					(),
+.mult_imm_ex_lck_i									(),
+.mult_dot_signed_ex_lck_i						(),
+.mult_is_clpx_ex_lck_i							(),
+.mult_clpx_shift_ex_lck_i						(),
+.mult_clpx_img_ex_lck_i							(),
+.csr_access_ex_lck_i								(),
+.csr_op_ex_lck_i										(),
+.csr_irq_sec_lck_i									(),
+.csr_save_if_lck_i									(),
+.csr_save_id_lck_i									(),
+.csr_save_ex_lck_i									(),
+.csr_cause_lck_i										(),
+.csr_save_cause_lck_i								(),
+.csr_restore_mret_id_lck_i					(),
+.csr_restore_uret_id_lck_i					(),
+.csr_restore_dret_id_lck_i					(),
+.data_misaligned_ex_lck_i						(),
+//.useincr_addr_ex_lck_i							(),
+.data_err_ack_lck_i									(),
+.debug_mode_lck_i										(),
+.debug_cause_lck_i									(),
+.debug_csr_save_lck_i								(),
+.perf_jump_lck_i										(),
+.perf_jr_stall_lck_i								(),
+.perf_ld_stall_lck_i								(),
+.perf_pipeline_stall_lck_i					(),
+.id_valid_lck_i											(),
+.pc_ex_lck_i												(),
+.apu_en_ex_lck_i										(),
+.apu_type_ex_lck_i									(),
+.apu_flags_ex_lck_i									(),
+.apu_op_ex_lck_i										(),
+.apu_lat_ex_lck_i										(),
+.apu_waddr_ex_lck_i									(),
+.regfile_waddr_ex_lck_i							(),
+.regfile_we_ex_lck_i								(),
+.regfile_alu_waddr_ex_lck_i					(),
+.regfile_alu_we_ex_lck_i						(),
+.imm_i_type_lck_o(imm_i_type_lck),
+.imm_iz_type_lck_o(imm_i_type_lck),
+.imm_s_type_lck_o(imm_s_type_lck),
+.imm_sb_type_lck_o(imm_sb_type_lck),
+.imm_u_type_lck_o(imm_u_type_lck),
+.imm_uj_type_lck_o(imm_uj_type_lck),
+.imm_z_type_lck_o(imm_z_type_lck),
+.imm_s2_type_lck_o(imm_s2_type_lck),
+.imm_bi_type_lck_o(imm_bi_type_lck),
+.imm_s3_type_lck_o(imm_s3_type_lck),
+.imm_vs_type_lck_o(imm_vs_type_lck),
+.imm_vu_type_lck_o(imm_vu_type_lck),
+.imm_shuffleb_type_lck_o(imm_shuffleb_type_lck),
+.imm_shuffleh_type_lck_o(imm_shuffleh_type_lck),
+.imm_clip_type_lck_o(imm_clip_type_lck),
+.imm_i_type_lck_i(),
+.imm_iz_type_lck_i(),
+.imm_s_type_lck_i(),
+.imm_sb_type_lck_i(),
+.imm_u_type_lck_i(),
+.imm_uj_type_lck_i(),
+.imm_z_type_lck_i(),
+.imm_s2_type_lck_i(),
+.imm_bi_type_lck_i(),
+.imm_s3_type_lck_i(),
+.imm_vs_type_lck_i(),
+.imm_vu_type_lck_i(),
+.imm_shuffleb_type_lck_i(),
+.imm_shuffleh_type_lck_i(),
+.imm_clip_type_lck_i(),
+.alu_op_a_mux_sel_lck_o(alu_op_a_mux_sel_lck),
+.alu_op_b_mux_sel_lck_o(alu_op_b_mux_sel_lck),
+.alu_op_c_mux_sel_lck_o(alu_op_c_mux_sel_lck),
+.alu_op_a_mux_sel_lck_i(),
+.alu_op_b_mux_sel_lck_i(),
+.alu_op_c_mux_sel_lck_i(),
+.imm_a_mux_sel_lck_o(imm_a_mux_sel_lck),
+.imm_b_mux_sel_lck_o(imm_b_mux_sel_lck),
+.imm_a_mux_sel_lck_i(),
+.imm_b_mux_sel_lck_i(),
+.operand_a_fw_mux_sel_lck_o(operand_a_fw_mux_sel_lck),
+.operand_b_fw_mux_sel_lck_o(operand_b_fw_mux_sel_lck),
+.operand_c_fw_mux_sel_lck_o(operand_c_fw_mux_sel_lck),
+.operand_a_fw_mux_sel_lck_i(),
+.operand_b_fw_mux_sel_lck_i(),
+.operand_c_fw_mux_sel_lck_i(),
+.prepost_useincr_lck_o(prepost_useincr_lck),
+.alu_en_lck_o(alu_en_lck),
+.alu_operator_lck_o(alu_operator_lck),
+.prepost_useincr_lck_i(prepost_useincr_lck_i),
+.alu_en_lck_i(alu_en_lck_i),
+.alu_operator_lck_i(alu_operator_lck_i),
+.mult_operator_lck_o(mult_operator_lck),
+.mult_en_lck_o(mult_en_lck),
+.mult_dot_en_lck_o(mult_dot_en_lck),
+.mult_int_en_lck_o(mult_int_en_lck),
+.mult_operator_lck_i(),
+.mult_en_lck_i(),
+.mult_dot_en_lck_i(),
+.mult_int_en_lck_i(),
+.misaligned_stall_lck_o(misaligned_stall_lck),
+.jr_stall_lck_o(jr_stall_lck),
+.load_stall_lck_o(load_stall_lck),
+.misaligned_stall_lck_i(),
+.jr_stall_lck_i(),
+.load_stall_lck_i(),
+.jump_in_id_lck_o(jump_in_id_lck),
+.jump_in_id_lck_i(),
+.data_we_id_lck_o(data_we_id_lck),
+.data_type_id_lck_o(data_type_id_lck),
+.data_sign_ext_id_lck_o(data_sign_ext_id_lck),
+.data_reg_offset_id_lck_o(data_reg_offset_id_lck),
+.data_req_id_lck_o(data_req_id_lck),
+.data_load_event_id_lck_o(data_load_event_id_lck),
+.data_we_id_lck_i(),
+.data_type_id_lck_i(),
+.data_sign_ext_id_lck_i(),
+.data_reg_offset_id_lck_i(),
+.data_req_id_lck_i(),
+.data_load_event_id_lck_i(),
+
+				.regfile_addr_ra_id_lck_o(regfile_addr_ra_id_lck),
+				.regfile_addr_rb_id_lck_o(regfile_addr_rb_id_lck),
+				.regfile_addr_rc_id_lck_o(regfile_addr_rc_id_lck),
+				.regfile_addr_ra_id_lck_i(),
+				.regfile_addr_rb_id_lck_i(),
+				.regfile_addr_rc_id_lck_i(),
 
         .init_ni             ( s_init_n              ),
         .cluster_id_i        ( cluster_id_i          ),
@@ -979,7 +1257,8 @@ module pulp_cluster
         .clk_i               ( clk_cluster           ),
         .rst_ni              ( s_rst_n               ),
         .base_addr_i         ( base_addr_i           ),
-        .lockstep_mode       ( lockstep_mode ),
+        .lockstep_mode_if    ( lockstep_mode_if ),
+				.lockstep_mode_id		 ( lockstep_mode_id ),
 
 		    .is_hwlp_id_lck_i		         ( is_hwlp_id_lck			     ),
 		    .hwlp_dec_cnt_id_lck_i		   ( hwlp_dec_cnt_id_lck		 ),
@@ -999,6 +1278,185 @@ module pulp_cluster
 		    .illegal_c_insn_id_lck_o		 (),
 		    .pc_if_lck_o		             (),
 		    .pc_id_lck_o		             (),
+
+				.regfile_addr_ra_id_lck_i(regfile_addr_ra_id_lck),
+				.regfile_addr_rb_id_lck_i(regfile_addr_rb_id_lck),
+				.regfile_addr_rc_id_lck_i(regfile_addr_rc_id_lck),
+				.regfile_addr_ra_id_lck_o(),
+				.regfile_addr_rb_id_lck_o(),
+				.regfile_addr_rc_id_lck_o(),
+
+		//IF-ID LOCKSTEP
+.bmask_a_ex_lck_i										(bmask_a_ex_lck									),
+.bmask_b_ex_lck_i										(bmask_b_ex_lck			),
+.alu_vec_mode_ex_lck_i							(alu_vec_mode_ex_lck),
+.alu_is_clpx_ex_lck_i								(alu_is_clpx_ex_lck),
+.alu_is_subrot_ex_lck_i							(alu_is_subrot_ex_lck),
+.alu_clpx_shift_ex_lck_i						(alu_clpx_shift_ex_lck),
+.mult_sel_subword_ex_lck_i					(mult_sel_subword_ex_lck),
+.mult_signed_mode_ex_lck_i					(mult_signed_mode_ex_lck),
+.mult_imm_ex_lck_i									(mult_imm_ex_lck),
+.mult_dot_signed_ex_lck_i						(mult_dot_signed_ex_lck),
+.mult_is_clpx_ex_lck_i							(mult_is_clpx_ex_lck),
+.mult_clpx_shift_ex_lck_i						(mult_clpx_shift_ex_lck),
+.mult_clpx_img_ex_lck_i							(mult_clpx_img_ex_lck),
+.csr_access_ex_lck_i								(csr_access_ex_lck),
+.csr_op_ex_lck_i										(csr_op_ex_lck),
+.csr_irq_sec_lck_i									(csr_irq_sec_lck),
+.csr_save_if_lck_i									(csr_save_if_lck),
+.csr_save_id_lck_i									(csr_save_id_lck),
+.csr_save_ex_lck_i									(csr_save_ex_lck),
+.csr_cause_lck_i										(csr_cause_lck),
+.csr_save_cause_lck_i								(csr_save_cause_lck),
+.csr_restore_mret_id_lck_i					(csr_restore_mret_id_lck),
+.csr_restore_uret_id_lck_i					(csr_restore_uret_id_lck),
+.csr_restore_dret_id_lck_i					(csr_restore_dret_id_lck),
+.data_misaligned_ex_lck_i						(data_misaligned_ex_lck),
+.data_err_ack_lck_i									(data_err_ack_lck),
+.debug_mode_lck_i										(debug_mode_lck),
+.debug_cause_lck_i									(debug_cause_lck),
+.debug_csr_save_lck_i								(debug_csr_save_lck),
+.perf_jump_lck_i										(perf_jump_lck),
+.perf_jr_stall_lck_i								(perf_jr_stall_lck),
+.perf_ld_stall_lck_i								(perf_ld_stall_lck),
+.perf_pipeline_stall_lck_i					(perf_pipeline_stall_lck),
+.id_valid_lck_i											(id_valid_lck),
+.pc_ex_lck_i												(pc_ex_lck),
+.apu_en_ex_lck_i(apu_en_ex_lck),
+.apu_type_ex_lck_i(apu_type_ex_lck),
+.apu_flags_ex_lck_i(apu_flags_ex_lck),
+.apu_op_ex_lck_i(apu_op_ex_lck),
+.apu_lat_ex_lck_i(apu_lat_ex_lck),
+.apu_waddr_ex_lck_i(apu_waddr_ex_lck),
+.regfile_waddr_ex_lck_i					(regfile_waddr_ex_lck),
+.regfile_we_ex_lck_i						(regfile_we_ex_lck),
+.regfile_alu_waddr_ex_lck_i					(regfile_alu_waddr_ex_lck),
+.regfile_alu_we_ex_lck_i						(regfile_alu_we_ex_lck),
+.bmask_a_ex_lck_o										(),
+.bmask_b_ex_lck_o										(),
+.alu_vec_mode_ex_lck_o							(),
+.alu_is_clpx_ex_lck_o								(),
+.alu_is_subrot_ex_lck_o							(),
+.alu_clpx_shift_ex_lck_o						(),
+.mult_sel_subword_ex_lck_o					(),
+.mult_signed_mode_ex_lck_o					(),
+.mult_imm_ex_lck_o									(),
+.mult_dot_signed_ex_lck_o						(),
+.mult_is_clpx_ex_lck_o							(),
+.mult_clpx_shift_ex_lck_o						(),
+.mult_clpx_img_ex_lck_o							(),
+.csr_access_ex_lck_o								(),
+.csr_op_ex_lck_o										(),
+.csr_irq_sec_lck_o									(),
+.csr_save_if_lck_o									(),
+.csr_save_id_lck_o									(),
+.csr_save_ex_lck_o									(),
+.csr_cause_lck_o										(),
+.csr_save_cause_lck_o								(),
+.csr_restore_mret_id_lck_o					(),
+.csr_restore_uret_id_lck_o					(),
+.csr_restore_dret_id_lck_o					(),
+.data_misaligned_ex_lck_o						(),
+.data_err_ack_lck_o									(),
+.debug_mode_lck_o										(),
+.debug_cause_lck_o									(),
+.debug_csr_save_lck_o								(),
+.perf_jump_lck_o										(),
+.perf_jr_stall_lck_o								(),
+.perf_ld_stall_lck_o								(),
+.perf_pipeline_stall_lck_o					(),
+.id_valid_lck_o											(),
+.pc_ex_lck_o												(),
+.apu_en_ex_lck_o(),
+.apu_type_ex_lck_o(),
+.apu_flags_ex_lck_o(),
+.apu_op_ex_lck_o(),
+.apu_lat_ex_lck_o(),
+.apu_waddr_ex_lck_o(),
+.regfile_waddr_ex_lck_o					(),
+.regfile_we_ex_lck_o						(),
+.regfile_alu_waddr_ex_lck_o					(),
+.regfile_alu_we_ex_lck_o						(),
+.imm_i_type_lck_i(imm_i_type_lck),
+.imm_iz_type_lck_i(imm_i_type_lck),
+.imm_s_type_lck_i(imm_s_type_lck),
+.imm_sb_type_lck_i(imm_sb_type_lck),
+.imm_u_type_lck_i(imm_u_type_lck),
+.imm_uj_type_lck_i(imm_uj_type_lck),
+.imm_z_type_lck_i(imm_z_type_lck),
+.imm_s2_type_lck_i(imm_s2_type_lck),
+.imm_bi_type_lck_i(imm_bi_type_lck),
+.imm_s3_type_lck_i(imm_s3_type_lck),
+.imm_vs_type_lck_i(imm_vs_type_lck),
+.imm_vu_type_lck_i(imm_vu_type_lck),
+.imm_shuffleb_type_lck_i(imm_shuffleb_type_lck),
+.imm_shuffleh_type_lck_i(imm_shuffleh_type_lck),
+.imm_clip_type_lck_i(imm_clip_type_lck),
+.imm_i_type_lck_o(),
+.imm_iz_type_lck_o(),
+.imm_s_type_lck_o(),
+.imm_sb_type_lck_o(),
+.imm_u_type_lck_o(),
+.imm_uj_type_lck_o(),
+.imm_z_type_lck_o(),
+.imm_s2_type_lck_o(),
+.imm_bi_type_lck_o(),
+.imm_s3_type_lck_o(),
+.imm_vs_type_lck_o(),
+.imm_vu_type_lck_o(),
+.imm_shuffleb_type_lck_o(),
+.imm_shuffleh_type_lck_o(),
+.imm_clip_type_lck_o(),
+.alu_op_a_mux_sel_lck_i(alu_op_a_mux_sel_lck),
+.alu_op_b_mux_sel_lck_i(alu_op_b_mux_sel_lck),
+.alu_op_c_mux_sel_lck_i(alu_op_c_mux_sel_lck),
+.alu_op_a_mux_sel_lck_o(),
+.alu_op_b_mux_sel_lck_o(),
+.alu_op_c_mux_sel_lck_o(),
+.imm_a_mux_sel_lck_i(imm_a_mux_sel_lck),
+.imm_b_mux_sel_lck_i(imm_b_mux_sel_lck),
+.imm_a_mux_sel_lck_o(),
+.imm_b_mux_sel_lck_o(),
+.operand_a_fw_mux_sel_lck_i(operand_a_fw_mux_sel_lck),
+.operand_b_fw_mux_sel_lck_i(operand_b_fw_mux_sel_lck),
+.operand_c_fw_mux_sel_lck_i(operand_c_fw_mux_sel_lck),
+.operand_a_fw_mux_sel_lck_o(),
+.operand_b_fw_mux_sel_lck_o(),
+.operand_c_fw_mux_sel_lck_o(),
+.prepost_useincr_lck_o(),
+.alu_en_lck_o(),
+.alu_operator_lck_o(),
+.prepost_useincr_lck_i(prepost_useincr_lck),
+.alu_en_lck_i(alu_en_lck),
+.alu_operator_lck_i(alu_operator_lck),
+.mult_operator_lck_i(mult_operator_lck),
+.mult_en_lck_i(mult_en_lck),
+.mult_dot_en_lck_i(mult_dot_en_lck),
+.mult_int_en_lck_i(mult_int_en_lck),
+.mult_operator_lck_o(),
+.mult_en_lck_o(),
+.mult_dot_en_lck_o(),
+.mult_int_en_lck_o(),
+.misaligned_stall_lck_i(misaligned_stall_lck),
+.jr_stall_lck_i(jr_stall_lck),
+.load_stall_lck_i(load_stall_lck),
+.misaligned_stall_lck_o(),
+.jr_stall_lck_o(),
+.load_stall_lck_o(),
+.jump_in_id_lck_i(jump_in_id_lck),
+.jump_in_id_lck_o(),
+.data_we_id_lck_i(data_we_id_lck),
+.data_type_id_lck_i(data_type_id_lck),
+.data_sign_ext_id_lck_i(data_sign_ext_id_lck),
+.data_reg_offset_id_lck_i(data_reg_offset_id_lck),
+.data_req_id_lck_i(data_req_id_lck),
+.data_load_event_id_lck_i(data_load_event_id_lck),
+.data_we_id_lck_o(),
+.data_type_id_lck_o(),
+.data_sign_ext_id_lck_o(),
+.data_reg_offset_id_lck_o(),
+.data_req_id_lck_o(),
+.data_load_event_id_lck_o(),
 
         .init_ni             ( s_init_n              ),
         .cluster_id_i        ( cluster_id_i          ),
@@ -1742,7 +2200,8 @@ lockstep_ctrl_wrap #(
   .clk_i(clk_i),
   .rst_ni(s_rst_n),
   .speriph_slave(lck_ctrl_master),
-  .lockstep_mode(lockstep_mode)
+  .lockstep_mode_if(lockstep_mode_if),
+  .lockstep_mode_id(lockstep_mode_id)
  );
 
 lockstep_unit_wrap lockstep_unit_wrap_i
@@ -1751,7 +2210,7 @@ lockstep_unit_wrap lockstep_unit_wrap_i
  .rst_ni(s_rst_n),
  .lockstep2core(core2lockstep),
  .lockstep2interconnect(interconnect2lockstep),
- .lockstep_mode(lockstep_mode)
+ .lockstep_mode(lockstep_mode_if | lockstep_mode_id)
 );
 
 endmodule

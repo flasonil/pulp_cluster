@@ -7,7 +7,8 @@ module lockstep_ctrl_wrap
     input  logic          rst_ni,
 
     XBAR_PERIPH_BUS.Slave speriph_slave[7:0],
-    output logic lockstep_mode
+    output logic lockstep_mode_if,
+    output logic lockstep_mode_id
     );
 
    lockstep_ctrl
@@ -89,7 +90,8 @@ module lockstep_ctrl_wrap
       .r_rdata_o6        ( speriph_slave[6].r_rdata ),
       .r_rdata_o7        ( speriph_slave[7].r_rdata ),
 
-      .lockstep_mode (lockstep_mode)
+      .lockstep_mode_if (lockstep_mode_if),
+      .lockstep_mode_id (lockstep_mode_id)
       );
 
    
